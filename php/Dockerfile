@@ -1,5 +1,7 @@
 FROM php:fpm
 
+COPY --from=node / /
+
 RUN apt update \
     && apt install -y zlib1g-dev g++ git libicu-dev zip libzip-dev zip \
     && docker-php-ext-install intl opcache pdo pdo_mysql \
