@@ -4,7 +4,7 @@ services:
   database:
     container_name: mysql
     image: mysql:latest
-    command: --mysql-native-password=ON
+    #command: --mysql-native-password=ON
     environment:
       MYSQL_ROOT_PASSWORD: secret
     ports:
