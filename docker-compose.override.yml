@@ -1,0 +1,18 @@
+# development
+# docker-compose up -d
+
+# production - bypass the override file
+# docker-compose -f docker-compose.yml up
+
+services:
+  webpack:
+    container_name: webpack
+    build:
+      context: ./php  
+    working_dir: /var/www/symfony_docker
+    volumes:
+      - ./app:/var/www/symfony_docker
+    entrypoint: [ "npm", "run", "watch" ]
+    depends_on:
+      - php
+    restart: always
