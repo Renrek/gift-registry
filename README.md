@@ -28,11 +28,11 @@
 	- `composer install` — PHP deps
 	- `yarn install` or `npm install` — JS deps
 	- `yarn build` or `npm run build` — build frontend
-- **Testing:**
-	- `./scripts/phpunit.sh` — PHPUnit
-	- `./scripts/phpstan.sh` — PHPStan static analysis
-- **Type Generation:**
-	- `php bin/generate-types` — sync PHP DTOs/Enums to TypeScript
+**Testing and Type Generation:**
+	_All commands below should be run inside the Docker PHP container (after `docker compose exec php bash`):_
+		- `./scripts/phpunit.sh` — PHPUnit
+		- `./scripts/phpstan.sh` — PHPStan static analysis
+		- `php bin/generate-types` — sync PHP DTOs/Enums to TypeScript
 
 ## Conventions
 - **DTOs/Enums:** Annotate PHP with `#[DTO]` or `#[DTOEnum]` for type gen
