@@ -7,8 +7,7 @@
 services:
   webpack:
     container_name: webpack
-    build:
-      context: ./php  
+    image: node:22-alpine
     working_dir: /var/www/symfony_docker
     volumes:
       - ./app:/var/www/symfony_docker

@@ -1,8 +1,6 @@
-FROM php:fpm
+FROM php:8.4-fpm
 
-COPY --from=node / /
-
-RUN apt update \
+RUN apt-get update \
     && apt install -y zlib1g-dev g++ git libicu-dev zip libzip-dev zip \
     && docker-php-ext-install intl opcache pdo pdo_mysql \
     && pecl install apcu \

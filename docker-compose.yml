@@ -1,7 +1,7 @@
 services:
   database:
     container_name: mysql
-    image: mysql:latest
+    image: mysql:9.5
     #command: --mysql-native-password=ON
     environment:
       MYSQL_ROOT_PASSWORD: secret
