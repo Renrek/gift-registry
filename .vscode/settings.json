@@ -1,2 +1,9 @@
 {
+	"intelephense.environment.includePaths": [
+		"${workspaceFolder}/app/vendor"
+	],
+	"intelephense.files.exclude": [
+		"**/node_modules/**",
+		"**/var/cache/**"
+	]
 }
