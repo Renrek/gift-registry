@@ -1,8 +1,38 @@
-# development
-# docker-compose up -d
-
-# production - bypass the override file
-# docker-compose -f docker-compose.yml up
+# Development
+# 1. Install frontend dependencies when needed:
+#    docker compose run --rm --entrypoint npm webpack install
+# 2. Start the base services plus the Webpack watcher:
+#    docker compose up -d
+# 3. View frontend watcher output:
+#    docker compose logs -f webpack
+#
+# Production-style deployment
+# 1. Build optimized frontend assets before starting the base stack:
+#    docker compose run --rm --entrypoint npm webpack ci
+#    docker compose run --rm --entrypoint npm webpack run build
+# 2. Confirm only database, php, and nginx will run:
+#    docker compose -f docker-compose.yml config --services
+# 3. Start production services without this override file:
+#    docker compose -f docker-compose.yml up -d --build
+# 4. Install production PHP dependencies:
+#    docker compose -f docker-compose.yml exec php \
+#      composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+# 5. Clear the Symfony production cache:
+#    docker compose -f docker-compose.yml exec php \
+#      php bin/console cache:clear --env=prod --no-debug
+# 6. Review and apply pending migrations deliberately:
+#    docker compose -f docker-compose.yml exec php \
+#      php bin/console doctrine:migrations:status
+#    docker compose -f docker-compose.yml exec php \
+#      php bin/console doctrine:migrations:migrate --no-interaction
+# 7. Check service status and application logs:
+#    docker compose -f docker-compose.yml ps
+#    docker compose -f docker-compose.yml logs --tail=100 php nginx database
+# 8. Verify the application:
+#    curl -I http://localhost
+#
+# Stop the production-style stack without removing database files:
+# docker compose -f docker-compose.yml down
 
 services:
   webpack:
