@@ -34,6 +34,56 @@
 		- `./scripts/phpstan.sh` — PHPStan static analysis
 		- `php bin/generate-types` — sync PHP DTOs/Enums to TypeScript
 
+## Production Deployment
+
+Development uses `docker-compose.yml` plus `docker-compose.override.yml`. The
+override starts the Node/Webpack watcher and the base file starts the local
+MySQL service.
+
+Production uses `docker-compose.prod.yml`. It starts only PHP and Nginx; the
+database is an external MySQL server supplied through `app/.env.prod.local`.
+
+### One-time server setup
+
+1. Install Docker Compose, Git, and SSH access for the deployment user.
+2. Clone this repository on the server.
+3. Copy `app/.env.prod.local.example` to `app/.env.prod.local`.
+4. Set a unique `APP_SECRET` and the external MySQL `DATABASE_URL`.
+5. Configure HTTPS in front of the Nginx service.
+6. Confirm the server can reach the MySQL host and that the database user has
+	 only the required application privileges.
+
+### Manual production deployment
+
+```sh
+git fetch origin main
+git reset --hard origin/main
+docker run --rm -v "$PWD/app:/app" -w /app node:22-alpine \
+	sh -c 'npm ci && npm run build'
+docker compose -f docker-compose.prod.yml build php
+docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml exec -T php \
+	composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+docker compose -f docker-compose.prod.yml exec -T php \
+	php bin/console cache:clear --env=prod --no-debug
+docker compose -f docker-compose.prod.yml exec -T php \
+	php bin/console doctrine:migrations:migrate --no-interaction
+```
+
+### GitHub Actions deployment
+
+The workflow at `.github/workflows/ci-cd.yml` runs PHPStan, PHPUnit, and the
+frontend build for every pull request and push. A push to `main` deploys over
+SSH after those checks pass.
+
+Configure these secrets in the GitHub `production` environment:
+
+- `DEPLOY_HOST`
+- `DEPLOY_PORT` (optional; defaults to `22`)
+- `DEPLOY_USER`
+- `DEPLOY_SSH_KEY`
+- `DEPLOY_PATH` (the server checkout directory)
+
 ## Conventions
 - **DTOs/Enums:** Annotate PHP with `#[DTO]` or `#[DTOEnum]` for type gen
 - **ArrayOf:** Use `#[ArrayOf(SomeClass::class)]` for array-typed DTOs
