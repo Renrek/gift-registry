@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  test-php:
+  phpstan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,11 +36,31 @@ jobs:
         working-directory: app
         run: ./scripts/phpstan.sh
 
+  phpunit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: ctype, iconv, intl, pdo_mysql, zip
+          coverage: none
+
+      - name: Install Composer dependencies
+        working-directory: app
+        run: composer install --no-interaction --prefer-dist
+
       - name: Run PHPUnit
         working-directory: app
         run: ./scripts/phpunit.sh
 
   build-frontend:
+    needs: [phpstan, phpunit]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -65,7 +85,7 @@ jobs:
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [test-php, build-frontend]
+    needs: [phpstan, phpunit, build-frontend]
     runs-on: ubuntu-latest
     environment: production
     steps:
