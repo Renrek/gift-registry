@@ -55,34 +55,33 @@ database is an external MySQL server supplied through `app/.env.prod.local`.
 
 ### Manual production deployment
 
+Production deployment is intentionally run from the server (manual CD), while
+GitHub Actions is used for CI checks only.
+
+One-time setup on the server:
+
 ```sh
-git fetch origin main
-git reset --hard origin/main
-docker run --rm -v "$PWD/app:/app" -w /app node:22-alpine \
-	sh -c 'npm ci && npm run build'
-docker compose -f docker-compose.prod.yml build php
-docker compose -f docker-compose.prod.yml up -d
-docker compose -f docker-compose.prod.yml exec -T php \
-	composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
-docker compose -f docker-compose.prod.yml exec -T php \
-	php bin/console cache:clear --env=prod --no-debug
-docker compose -f docker-compose.prod.yml exec -T php \
-	php bin/console doctrine:migrations:migrate --no-interaction
+chmod +x ./scripts/production/bootstrap.sh ./scripts/production/deploy.sh
+./scripts/production/bootstrap.sh
 ```
 
-### GitHub Actions deployment
+Repeatable deploy command:
+
+```sh
+./scripts/production/deploy.sh
+```
+
+Optional branch deploy:
+
+```sh
+./scripts/production/deploy.sh main
+```
+
+### GitHub Actions CI
 
 The workflow at `.github/workflows/ci-cd.yml` runs PHPStan, PHPUnit, and the
-frontend build for every pull request and push. A push to `main` deploys over
-SSH after those checks pass.
-
-Configure these secrets in the GitHub `production` environment:
-
-- `DEPLOY_HOST`
-- `DEPLOY_PORT` (optional; defaults to `22`)
-- `DEPLOY_USER`
-- `DEPLOY_SSH_KEY`
-- `DEPLOY_PATH` (the server checkout directory)
+frontend build for pull requests and pushes to `main`. Deployment is not
+triggered from GitHub Actions.
 
 ## Conventions
 - **DTOs/Enums:** Annotate PHP with `#[DTO]` or `#[DTOEnum]` for type gen
