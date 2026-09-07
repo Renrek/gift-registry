@@ -1,10 +1,16 @@
 # Development
 # 1. Install frontend dependencies when needed:
 #    docker compose run --rm --entrypoint npm webpack install
-# 2. Start the base services plus the Webpack watcher:
+# 2. Start the base services plus the Webpack dev server (with HMR):
 #    docker compose up -d
-# 3. View frontend watcher output:
+# 3. Browse the app via the dev server (NOT localhost:80) to get HMR:
+#    http://localhost:8080
+# 4. View dev server output:
 #    docker compose logs -f webpack
+# 5. Alternative: rebuild assets to disk without a dev server/HMR
+#    (serves fine from plain http://localhost:80, but requires a manual
+#    browser refresh after each change):
+#    docker compose run --rm --entrypoint npm webpack run watch
 #
 # Production-style deployment
 # 1. Build optimized frontend assets before starting the base stack:
@@ -41,7 +47,9 @@ services:
     working_dir: /var/www/symfony_docker
     volumes:
       - ./app:/var/www/symfony_docker
-    entrypoint: [ "npm", "run", "watch" ]
+    ports:
+      - '8080:8080'
+    entrypoint: [ "npm", "run", "start" ]
     depends_on:
       - php
     restart: always
